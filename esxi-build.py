@@ -39,8 +39,15 @@ FILENAME = 'esxi-unlocker-302.tgz'
 
 TIMESTAMP = '{:%Y%m%d%H%M.%S}'.format(datetime.datetime.now())
 TOUCH = 'touch -t ' + TIMESTAMP
-GTARUNLOCKER = '/usr/local/bin/gtar czvf unlocker.tgz etc'
-GTARDISTRIB = '/usr/local/bin/gtar czvf ' + FILENAME + \
+
+if sys.platform == 'darwin':
+    TAR = '/usr/local/bin/gtar'
+else:
+    # Allow building on ESXi and others
+    TAR = subprocess.call(['which','tar'])
+
+GTARUNLOCKER = TAR ' czvf unlocker.tgz etc' # 
+GTARDISTRIB = TAR ' czvf ' + FILENAME + \
               ' unlocker.tgz esxi-install.sh esxi-uninstall.sh esxi-smctest.sh readme.txt'
 
 
@@ -68,8 +75,5 @@ def main():
 
 
 if __name__ == '__main__':
-    if sys.platform == 'darwin':
-        print('ESXi-Build for macOS')
-        main()
-    else:
-        print('ESXi-Build only supported on macOS')
+    # all systems with tar can make the archive
+    main()
